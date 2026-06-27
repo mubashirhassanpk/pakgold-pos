@@ -84,6 +84,50 @@ npm run db:reset && npm run db:migrate && npm run db:seed
 
 ---
 
+## Deploy to Hostinger (GitHub → live web)
+
+PakGold runs as a **long-lived Node.js server** (Next.js + SQLite), so use Hostinger's
+**Node.js app / Git deploy**. It will **not** run on plain shared/PHP hosting or on
+serverless (Vercel/Netlify). For a generic VPS see [`DEPLOY.md`](./DEPLOY.md).
+
+1. **Push this project to GitHub** (repo: `pakgold-pos`).
+2. In **hPanel → Websites → your site → Node.js / Git deploy**, **import from GitHub**
+   and pick the `pakgold-pos` repo.
+3. **Review build settings:**
+   - **Framework preset:** Next.js
+   - **Branch:** main
+   - **Node version:** 22.x
+   - **Root directory:** `./`
+   - **Build and output:** Default for Next.js
+4. **Environment variables → Add** — set this (recommended for data safety; it keeps the
+   database *outside* the deploy folder so re-deploys never wipe shop data):
+
+   | Name | Value |
+   |---|---|
+   | `DATABASE_PATH` | `/home/u152516335/pakgold-data/pakgold.db` |
+
+   > Replace `u152516335` with your own Hostinger home folder if it differs. The folder is
+   > created automatically on first run. **Do not** set `PORT` — Hostinger sets it.
+5. Click **Deploy**. Hostinger runs `npm install` + `npm run build`, then starts the server.
+   On first boot the app **auto-creates the database, applies all migrations, and seeds the
+   owner login** — no manual `db:migrate` / `db:seed` step is needed.
+6. Open the site → **login `owner` / `owner123`** → change it immediately in
+   **Settings → Users**, then set shop name, NTN/STRN, tax and rates.
+
+**Notes**
+- 🖨️ Hardware (thermal printer, weighing scale, cash drawer) only works when the server
+  runs on the shop PC (local COM ports). On remote hosting set **Settings → Hardware →
+  Printer = Off** and use the browser / A4 printing.
+- 💾 Take regular backups from **Settings → Backup & Restore**, especially before a redeploy.
+- 🔁 To update: push to `main` and redeploy — data at `DATABASE_PATH` is preserved and new
+  migrations apply automatically on the next start.
+
+> Build modes: a normal `npm run build` produces a standard server build for web hosting
+> (`next start`). The Electron desktop package uses `npm run dist`, which builds with
+> `STANDALONE=1` for the bundled standalone server.
+
+---
+
 ## Project structure
 
 ```
