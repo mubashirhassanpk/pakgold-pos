@@ -1,0 +1,22 @@
+PakGold POS — Run on this Windows PC
+=====================================
+
+ONE-TIME SETUP
+  1. Install Node.js 20+ (LTS) from https://nodejs.org
+  2. Double-click  "Install PakGold.bat"   (needs internet ONCE to download packages)
+
+DAILY USE
+  3. Double-click  "Start PakGold.bat"     (opens PakGold POS in your browser)
+     Keep the black window open while using the app. Close it to stop.
+
+LOGIN
+  owner / owner123   →  change it in  Settings > Users
+
+YOUR DATA
+  Saved in the  data\  folder inside this app.
+  Back it up regularly from  Settings > Backup & Restore  (to a USB or cloud drive).
+
+HARDWARE (scale / thermal printer / cash drawer)
+  Configure in  Settings > Hardware. Use "SIMULATE" to try without devices.
+
+Full guide: see  PACKAGING.md

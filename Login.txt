@@ -1,0 +1,2 @@
+cd "C:/Users/mubas/Downloads/Gold POS"
+npm run dev          # → http://localhost:3000   (login seed: owner / owner123)

@@ -1,0 +1,41 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# local database (shop data — never commit)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.db.restore
+pakgold.db
+
+# database backups (shop data)
+/backups
+
+# shop data (created by the launcher)
+/data
+
+# electron build output
+/dist-electron
+
+# misc
+.DS_Store
+*.pem
+.env*.local
+.env
+
+# debug
+npm-debug.log*
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts

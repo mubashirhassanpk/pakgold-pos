@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: #0b1120;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Proper Urdu rendering — apply .urdu to any Urdu text node. */
+.urdu {
+  font-family: var(--font-urdu), "Noto Nastaliq Urdu", serif;
+  direction: rtl;
+  line-height: 2.1; /* Nastaliq needs generous line height */
+}
+
+/* Big numeric displays (rates, totals) use tabular figures so digits align. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Thin gold scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4af37aa;
+  border-radius: 8px;
+}
+
+/* Print: show only the receipt area, hide app chrome. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #print-area,
+  #print-area * {
+    visibility: visible;
+  }
+  #print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    /* Width is set per-document: the 80mm thermal receipt sets it inline;
+       the A4 invoice fills the page width. */
+  }
+  .no-print {
+    display: none !important;
+  }
+}

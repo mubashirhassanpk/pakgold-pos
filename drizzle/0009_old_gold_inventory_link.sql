@@ -1,0 +1,1 @@
+ALTER TABLE `old_gold_purchase_items` ADD `inventory_item_id` integer;

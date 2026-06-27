@@ -1,0 +1,1 @@
+ALTER TABLE `old_gold_purchases` ADD `status` text DEFAULT 'active' NOT NULL;

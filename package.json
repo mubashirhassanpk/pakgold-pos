@@ -1,0 +1,89 @@
+{
+  "name": "pakgold-pos",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PakGold POS — Offline-first Gold & Jewelry POS for Pakistani Sarafa / Zargari businesses",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "launch": "node scripts/launch.mjs",
+    "lint": "next lint",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/lib/db/migrate.ts",
+    "db:seed": "tsx src/lib/db/seed.ts",
+    "db:reset": "tsx src/lib/db/reset.ts",
+    "test": "vitest run",
+    "electron:prepare": "node scripts/electron-prepare.mjs",
+    "electron:start": "electron electron/main.cjs",
+    "dist": "next build && npm run electron:prepare && electron-builder"
+  },
+  "build": {
+    "appId": "com.pakgold.pos",
+    "productName": "PakGold POS",
+    "directories": {
+      "output": "dist-electron",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": ".next/standalone",
+        "to": "standalone"
+      },
+      {
+        "from": "drizzle",
+        "to": "drizzle"
+      }
+    ],
+    "asarUnpack": [
+      "**/*.node"
+    ],
+    "npmRebuild": false,
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "PakGold POS"
+    }
+  },
+  "dependencies": {
+    "@types/qrcode": "^1.5.6",
+    "better-sqlite3": "^11.8.1",
+    "drizzle-orm": "^0.38.4",
+    "lucide-react": "^0.469.0",
+    "nanoid": "^5.0.9",
+    "next": "15.1.6",
+    "qrcode": "^1.5.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "serialport": "^12.0.0",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^3.7.1",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.7",
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3",
+    "autoprefixer": "^10.4.20",
+    "drizzle-kit": "^0.30.2",
+    "electron": "^33.3.1",
+    "electron-builder": "^25.1.8",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}

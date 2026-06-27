@@ -1,0 +1,83 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1782383835184,
+      "tag": "0000_glorious_ultragirl",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1782450440758,
+      "tag": "0001_hard_meggan",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1782454535726,
+      "tag": "0002_graceful_iceman",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1782455197788,
+      "tag": "0003_tranquil_thena",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1782466233268,
+      "tag": "0004_curious_swordsman",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1782468667697,
+      "tag": "0005_handy_zaladane",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1782470406972,
+      "tag": "0006_parallel_speedball",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1782473353042,
+      "tag": "0007_odd_nighthawk",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1782476000000,
+      "tag": "0008_silver_chandi",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1782476100000,
+      "tag": "0009_old_gold_inventory_link",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1782476200000,
+      "tag": "0010_old_gold_status",
+      "breakpoints": true
+    }
+  ]
+}
