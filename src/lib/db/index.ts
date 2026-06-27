@@ -120,6 +120,9 @@ function ensureSchema(sqlite: Database.Database) {
 }
 
 function createConnection(): Database.Database {
+  // Make sure the folder for DATABASE_PATH exists (e.g. a persistent path on a
+  // host), otherwise better-sqlite3 can't create the file.
+  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
   applyPendingRestore();
   const sqlite = new Database(DB_PATH);
   sqlite.pragma("journal_mode = WAL"); // better concurrency + crash safety
