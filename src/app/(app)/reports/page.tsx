@@ -41,7 +41,10 @@ export default async function ReportsPage({
       {/* Headline stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Stat label="Total Sales" value={formatPKR(r.summary.grandTotal)} accent />
-        <Stat label="Gold Value Sold" value={formatPKR(r.summary.goldValueTotal)} />
+        <Stat label="Gold Value Sold" value={formatPKR(r.goldValueSold)} />
+        {r.silverValueSold > 0 && (
+          <Stat label="Silver Value Sold" value={formatPKR(r.silverValueSold)} />
+        )}
         <Stat label="Making Earned" value={formatPKR(r.summary.makingTotal)} />
         <Stat label="Tax Collected" value={formatPKR(r.summary.taxTotal)} />
         <Stat label="Wastage Earned" value={formatPKR(r.summary.wastageTotal)} />
