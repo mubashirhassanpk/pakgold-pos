@@ -6,6 +6,7 @@ import { NoAccess } from "@/components/NoAccess";
 import { formatPKR, formatWeightDual } from "@/lib/format";
 import { gramsToTola } from "@/lib/units";
 import { silverPurityFactor } from "@/lib/constants";
+import { DeleteItemButton } from "./DeleteItemButton";
 
 export const dynamic = "force-dynamic";
 
@@ -118,12 +119,15 @@ export default async function InventoryPage() {
                   <td className="px-4 py-3 text-right font-semibold tnum">{formatPKR(value)}</td>
                   {canManage && (
                     <td className="px-4 py-3 text-right">
-                      <Link
-                        href={`/inventory/${it.id}/edit`}
-                        className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-navy-900 hover:bg-gold-50"
-                      >
-                        <Pencil size={13} /> Edit
-                      </Link>
+                      <div className="inline-flex items-center gap-2">
+                        <Link
+                          href={`/inventory/${it.id}/edit`}
+                          className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-navy-900 hover:bg-gold-50"
+                        >
+                          <Pencil size={13} /> Edit
+                        </Link>
+                        <DeleteItemButton id={it.id} name={it.nameEn} />
+                      </div>
                     </td>
                   )}
                 </tr>

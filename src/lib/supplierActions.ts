@@ -1,6 +1,6 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db, schema } from "./db";
 import { getCurrentUser, can } from "./auth";
@@ -41,6 +41,43 @@ export async function setSupplierActive(id: number, active: boolean) {
   db.update(schema.suppliers).set({ active }).where(eq(schema.suppliers.id, id)).run();
   revalidatePath("/suppliers");
   revalidatePath(`/suppliers/${id}`);
+  return { ok: true as const };
+}
+
+/**
+ * Permanently delete a supplier — only when it carries no ledger history. A
+ * supplier with purchase/payment entries (and therefore a payables trail) must
+ * be kept; deactivate it instead via setSupplierActive.
+ */
+export async function deleteSupplier(id: number) {
+  const user = await requireAccess();
+  const supplier = db
+    .select({ id: schema.suppliers.id })
+    .from(schema.suppliers)
+    .where(eq(schema.suppliers.id, id))
+    .get();
+  if (!supplier) return { ok: false as const, error: "Supplier not found" };
+
+  const entries =
+    db
+      .select({ c: sql<number>`count(*)` })
+      .from(schema.supplierLedger)
+      .where(eq(schema.supplierLedger.supplierId, id))
+      .get()?.c ?? 0;
+  if (entries > 0) {
+    return {
+      ok: false as const,
+      error: `Cannot delete — this supplier has ${entries} ledger entr${entries === 1 ? "y" : "ies"}. Deactivate it instead to keep the history.`,
+    };
+  }
+
+  db.transaction((tx) => {
+    tx.delete(schema.suppliers).where(eq(schema.suppliers.id, id)).run();
+    tx.insert(schema.auditLog)
+      .values({ userId: user.id, action: "supplier_delete", entity: "supplier", entityId: String(id) })
+      .run();
+  });
+  revalidatePath("/suppliers");
   return { ok: true as const };
 }
 
