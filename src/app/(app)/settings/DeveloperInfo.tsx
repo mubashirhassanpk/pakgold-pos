@@ -11,8 +11,8 @@ const DEV = {
     "Entrepreneur and developer with a passion for digital products & business development — founder of multiple ventures including StyleShop.pk.",
   website: "https://www.mubashirhassan.com",
   github: "https://github.com/mubashirhassanpk",
-  email: "", // e.g. "you@example.com"
-  whatsapp: "", // digits with country code, e.g. "9230012345678"
+  email: "hello@mubashirhassan.com",
+  whatsapp: "+92 322 2047786", // country code + number
 };
 
 export function DeveloperInfo() {
