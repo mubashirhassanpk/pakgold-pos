@@ -72,6 +72,18 @@ npm run dev             # http://localhost:3000
 
 Authentication is implemented: a `/login` screen, **scrypt** password hashing (Node built-in — no native bcrypt dependency), cookie sessions (`sessions` table), edge **middleware** that gates every route, and **role-based access** (owner / manager / accountant / salesman). The logged-in user is recorded on every sale, rate change, and audit-log entry. Old SHA-256 seed hashes are transparently re-hashed to scrypt on first successful login.
 
+### Manage logins / forgot password
+- **Change username, reset a staff password, change role, enable/disable** — owner does this in
+  **Settings → Users & Roles**. Owners/staff can change their **own** password in **Settings →
+  Change My Password**.
+- **Locked out (forgot username *and* password)?** There is no email reset (the app is offline).
+  On the machine/host that has the database, run:
+  ```bash
+  npm run reset-password                         # lists usernames (to find yours)
+  npm run reset-password -- owner NewPass123     # set a new password (re-enables the account)
+  ```
+  On hosting, set `DATABASE_PATH` first if your DB lives outside the project folder.
+
 ### Run the calculation tests
 ```bash
 npm test

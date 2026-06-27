@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { UserPlus, KeyRound } from "lucide-react";
-import { createUser, setUserActive, setUserRole, resetUserPassword } from "@/lib/userActions";
+import { UserPlus, KeyRound, AtSign } from "lucide-react";
+import { createUser, setUserActive, setUserRole, resetUserPassword, updateUsername } from "@/lib/userActions";
 
 interface UserRow {
   id: number;
@@ -43,6 +43,11 @@ export function UsersManager({ initial, currentUserId }: { initial: UserRow[]; c
     if (pw) run(() => resetUserPassword(id, pw));
   }
 
+  function rename(id: number, current: string) {
+    const name = prompt("New username (letters, numbers, . _ -):", current);
+    if (name && name.trim().toLowerCase() !== current) run(() => updateUsername(id, name));
+  }
+
   return (
     <section className="rounded-2xl bg-white ring-1 ring-black/5 p-5">
       <h2 className="font-semibold mb-4">Users &amp; Roles</h2>
@@ -67,6 +72,13 @@ export function UsersManager({ initial, currentUserId }: { initial: UserRow[]; c
                 <option key={r} value={r}>{r}</option>
               ))}
             </select>
+            <button
+              onClick={() => rename(u.id, u.username)}
+              title="Change username"
+              className="text-gray-400 hover:text-navy-900"
+            >
+              <AtSign size={16} />
+            </button>
             <button
               onClick={() => reset(u.id)}
               title="Reset password"

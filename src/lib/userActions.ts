@@ -61,6 +61,24 @@ export async function setUserRole(id: number, role: string) {
   return { ok: true as const };
 }
 
+export async function updateUsername(id: number, username: string) {
+  await requireOwner();
+  const clean = username.trim().toLowerCase();
+  if (!clean) return { ok: false as const, error: "Username cannot be empty" };
+  if (!/^[a-z0-9._-]{3,}$/.test(clean)) {
+    return { ok: false as const, error: "Use 3+ chars: letters, numbers, . _ -" };
+  }
+  const taken = db
+    .select({ id: schema.users.id })
+    .from(schema.users)
+    .where(eq(schema.users.username, clean))
+    .get();
+  if (taken && taken.id !== id) return { ok: false as const, error: "Username already taken" };
+  db.update(schema.users).set({ username: clean }).where(eq(schema.users.id, id)).run();
+  revalidatePath("/settings");
+  return { ok: true as const };
+}
+
 export async function resetUserPassword(id: number, password: string) {
   await requireOwner();
   if (password.length < 6) return { ok: false as const, error: "Password must be at least 6 characters" };
