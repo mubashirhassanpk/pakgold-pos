@@ -38,7 +38,9 @@ export function LoginForm() {
       >
         {pending ? "Signing in…" : "Sign In"}
       </button>
-      <p className="text-center text-[11px] text-gray-400">Default: owner / owner123</p>
+      {process.env.NODE_ENV !== "production" && (
+        <p className="text-center text-[11px] text-gray-400">Default: owner / owner123</p>
+      )}
     </form>
   );
 }
