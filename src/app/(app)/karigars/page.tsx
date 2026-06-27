@@ -4,12 +4,14 @@ import { getCurrentUser, can } from "@/lib/auth";
 import { NoAccess } from "@/components/NoAccess";
 import { formatPKR } from "@/lib/format";
 import { AddKarigar } from "./AddKarigar";
+import { DeleteKarigar } from "./DeleteKarigar";
 
 export const dynamic = "force-dynamic";
 
 export default async function KarigarsPage() {
   const user = await getCurrentUser();
   if (!can(user?.role, "karigars")) return <NoAccess role={user?.role ?? "unknown"} />;
+  const canManage = user?.role === "owner" || user?.role === "manager";
 
   const karigars = listKarigars();
   const totalPayable = karigars.reduce((s, k) => s + Math.max(0, k.balance), 0);
@@ -35,6 +37,7 @@ export default async function KarigarsPage() {
               <th className="px-4 py-3">Wage</th>
               <th className="px-4 py-3">Phone</th>
               <th className="px-4 py-3 text-right">Balance Payable</th>
+              {canManage && <th className="px-4 py-3 text-center">Actions</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -52,10 +55,15 @@ export default async function KarigarsPage() {
                     : k.balance < 0 ? <span className="text-success">{formatPKR(-k.balance)} adv</span>
                     : <span className="text-gray-300">Clear</span>}
                 </td>
+                {canManage && (
+                  <td className="px-4 py-3 text-center">
+                    <DeleteKarigar id={k.id} name={k.name} />
+                  </td>
+                )}
               </tr>
             ))}
             {karigars.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-10 text-center text-gray-400">No karigars yet.</td></tr>
+              <tr><td colSpan={canManage ? 6 : 5} className="px-4 py-10 text-center text-gray-400">No karigars yet.</td></tr>
             )}
           </tbody>
         </table>
