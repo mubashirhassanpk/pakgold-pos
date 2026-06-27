@@ -11,6 +11,7 @@ import { RolePermissions } from "./RolePermissions";
 import { BackupManager } from "./BackupManager";
 import { ResetData } from "./ResetData";
 import { ChangePassword } from "./ChangePassword";
+import { DeveloperInfo } from "./DeveloperInfo";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +54,8 @@ export default async function SettingsPage() {
           User management &amp; backups are available to the shop owner only.
         </div>
       )}
+
+      <DeveloperInfo />
     </div>
   );
 }
