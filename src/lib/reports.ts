@@ -122,11 +122,13 @@ export function getReport(r: DateRange) {
     .groupBy(schema.saleItems.silverPurity)
     .all();
 
-  // Sales split by metal (value + weight)
+  // Sales split by metal (value + weight). `value` is the metal value only
+  // (gold/silver), since sales.goldValueTotal lumps both metals together.
   const byMetal = db
     .select({
       metal: schema.saleItems.metal,
       total: sql<number>`coalesce(sum(${schema.saleItems.lineTotal}),0)`,
+      metalValue: sql<number>`coalesce(sum(${schema.saleItems.goldValue}),0)`,
       grams: sql<number>`coalesce(sum(${schema.saleItems.weightGrams} * ${schema.saleItems.quantity}),0)`,
     })
     .from(schema.saleItems)
@@ -134,6 +136,15 @@ export function getReport(r: DateRange) {
     .where(inRange(r))
     .groupBy(schema.saleItems.metal)
     .all();
+
+  // Split metal value so gold and silver are each visible on their own. The
+  // sales-level goldValueTotal combines both, which hid silver sales.
+  const goldValueSold = byMetal
+    .filter((m) => (m.metal ?? "gold") !== "silver")
+    .reduce((s, m) => s + m.metalValue, 0);
+  const silverValueSold = byMetal
+    .filter((m) => m.metal === "silver")
+    .reduce((s, m) => s + m.metalValue, 0);
 
   // By category (custom items fall under "Custom")
   const byCategory = db
@@ -266,6 +277,8 @@ export function getReport(r: DateRange) {
         grams: m.grams,
       }))
       .sort((a, b) => b.value - a.value),
+    goldValueSold,
+    silverValueSold,
     byCategory: byCategory
       .sort((a, b) => b.total - a.total)
       .map((c) => ({ label: c.category, value: c.total })),
