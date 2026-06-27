@@ -144,7 +144,7 @@ export async function updateItem(id: number, input: ItemInput) {
 }
 
 export async function deleteItem(id: number) {
-  await requireStockManager();
+  const user = await requireStockManager();
   const used = db
     .select({ c: sql<number>`count(*)` })
     .from(schema.saleItems)
@@ -153,7 +153,13 @@ export async function deleteItem(id: number) {
   if ((used?.c ?? 0) > 0) {
     return { ok: false as const, error: "Item appears on past sales and cannot be deleted." };
   }
-  db.delete(schema.inventoryItems).where(eq(schema.inventoryItems.id, id)).run();
+  db.transaction((tx) => {
+    // itemStones cascade-delete via FK; remove the piece itself here.
+    tx.delete(schema.inventoryItems).where(eq(schema.inventoryItems.id, id)).run();
+    tx.insert(schema.auditLog)
+      .values({ userId: user.id, action: "item_delete", entity: "item", entityId: String(id) })
+      .run();
+  });
   revalidatePath("/inventory");
   return { ok: true as const };
 }

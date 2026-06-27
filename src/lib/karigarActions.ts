@@ -1,6 +1,6 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db, schema } from "./db";
 import { getCurrentUser, can } from "./auth";
@@ -60,6 +60,50 @@ export async function setKarigarActive(id: number, active: boolean) {
   db.update(schema.karigars).set({ active }).where(eq(schema.karigars.id, id)).run();
   revalidatePath("/karigars");
   revalidatePath(`/karigars/${id}`);
+  return { ok: true as const };
+}
+
+/**
+ * Permanently delete a karigar/staff member — only when it is safe. We refuse if
+ * there is any ledger history (salary/dehari/commission/payouts) or the person is
+ * assigned to repair jobs or bookings, so wage records and job links stay intact.
+ * Use setKarigarActive to retire someone who has history.
+ */
+export async function deleteKarigar(id: number) {
+  const user = await requireAccess();
+  const karigar = db
+    .select({ id: schema.karigars.id })
+    .from(schema.karigars)
+    .where(eq(schema.karigars.id, id))
+    .get();
+  if (!karigar) return { ok: false as const, error: "Karigar not found" };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const countWhere = (table: any, col: any): number =>
+    db.select({ c: sql<number>`count(*)` }).from(table).where(eq(col, id)).get()?.c ?? 0;
+
+  const linked: string[] = [];
+  const ledger = countWhere(schema.karigarLedger, schema.karigarLedger.karigarId);
+  if (ledger > 0) linked.push(`${ledger} ledger entr${ledger === 1 ? "y" : "ies"}`);
+  const repairs = countWhere(schema.repairJobs, schema.repairJobs.karigarId);
+  if (repairs > 0) linked.push(`${repairs} repair job(s)`);
+  const bookings = countWhere(schema.bookings, schema.bookings.karigarId);
+  if (bookings > 0) linked.push(`${bookings} booking(s)`);
+
+  if (linked.length > 0) {
+    return {
+      ok: false as const,
+      error: `Cannot delete — this person has ${linked.join(", ")}. Deactivate instead to keep the history.`,
+    };
+  }
+
+  db.transaction((tx) => {
+    tx.delete(schema.karigars).where(eq(schema.karigars.id, id)).run();
+    tx.insert(schema.auditLog)
+      .values({ userId: user.id, action: "karigar_delete", entity: "karigar", entityId: String(id) })
+      .run();
+  });
+  revalidatePath("/karigars");
   return { ok: true as const };
 }
 
