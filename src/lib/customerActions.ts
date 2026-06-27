@@ -3,7 +3,7 @@
 import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db, schema } from "./db";
-import { getCurrentUser } from "./auth";
+import { getCurrentUser, can } from "./auth";
 import { round2 } from "./calculations";
 
 export interface CustomerInput {
@@ -48,6 +48,63 @@ export async function updateCustomer(id: number, input: CustomerInput) {
     .where(eq(schema.customers.id, id))
     .run();
   revalidatePath(`/customers/${id}`);
+  revalidatePath("/customers");
+  return { ok: true as const };
+}
+
+/**
+ * Permanently delete a customer — but only when it is safe to do so. We refuse
+ * if the customer carries any financial history (sales, repairs, bookings,
+ * old-gold purchases, committee membership) or an unsettled balance, so historical
+ * records are never orphaned. Such customers should be kept (or their balance
+ * settled) rather than deleted.
+ */
+export async function deleteCustomer(id: number) {
+  const user = await getCurrentUser();
+  if (!can(user?.role, "customers")) return { ok: false as const, error: "Not authorized" };
+
+  const customer = db
+    .select({ balance: schema.customers.balance })
+    .from(schema.customers)
+    .where(eq(schema.customers.id, id))
+    .get();
+  if (!customer) return { ok: false as const, error: "Customer not found" };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const countWhere = (table: any, col: any): number =>
+    db.select({ c: sql<number>`count(*)` }).from(table).where(eq(col, id)).get()?.c ?? 0;
+
+  const linked: string[] = [];
+  const sales = countWhere(schema.sales, schema.sales.customerId);
+  if (sales > 0) linked.push(`${sales} sale(s)`);
+  const repairs = countWhere(schema.repairJobs, schema.repairJobs.customerId);
+  if (repairs > 0) linked.push(`${repairs} repair job(s)`);
+  const bookings = countWhere(schema.bookings, schema.bookings.customerId);
+  if (bookings > 0) linked.push(`${bookings} booking(s)`);
+  const purchases = countWhere(schema.oldGoldPurchases, schema.oldGoldPurchases.customerId);
+  if (purchases > 0) linked.push(`${purchases} old-gold purchase(s)`);
+  const memberships = countWhere(schema.committeeMembers, schema.committeeMembers.customerId);
+  if (memberships > 0) linked.push(`${memberships} committee membership(s)`);
+
+  if (linked.length > 0) {
+    return {
+      ok: false as const,
+      error: `Cannot delete — this customer has ${linked.join(", ")} on record. Their history must stay intact.`,
+    };
+  }
+  if (Math.abs(customer.balance) >= 0.01) {
+    return {
+      ok: false as const,
+      error: "Cannot delete — this customer has an outstanding balance. Settle it first.",
+    };
+  }
+
+  db.transaction((tx) => {
+    tx.delete(schema.customers).where(eq(schema.customers.id, id)).run();
+    tx.insert(schema.auditLog)
+      .values({ userId: user?.id ?? null, action: "customer_delete", entity: "customer", entityId: String(id) })
+      .run();
+  });
   revalidatePath("/customers");
   return { ok: true as const };
 }

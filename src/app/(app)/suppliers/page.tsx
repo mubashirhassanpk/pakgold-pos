@@ -4,12 +4,14 @@ import { getCurrentUser, can } from "@/lib/auth";
 import { NoAccess } from "@/components/NoAccess";
 import { formatPKR } from "@/lib/format";
 import { AddSupplier } from "./AddSupplier";
+import { DeleteSupplier } from "./DeleteSupplier";
 
 export const dynamic = "force-dynamic";
 
 export default async function SuppliersPage() {
   const user = await getCurrentUser();
   if (!can(user?.role, "suppliers")) return <NoAccess role={user?.role ?? "unknown"} />;
+  const canManage = user?.role === "owner" || user?.role === "manager";
 
   const suppliers = listSuppliers();
   const totalPayable = suppliers.reduce((s, x) => s + Math.max(0, x.balance), 0);
@@ -31,6 +33,7 @@ export default async function SuppliersPage() {
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Phone</th>
               <th className="px-4 py-3 text-right">Balance Payable</th>
+              {canManage && <th className="px-4 py-3 text-center">Actions</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -43,9 +46,14 @@ export default async function SuppliersPage() {
                     : s.balance < 0 ? <span className="text-success">{formatPKR(-s.balance)} adv</span>
                     : <span className="text-gray-300">Clear</span>}
                 </td>
+                {canManage && (
+                  <td className="px-4 py-3 text-center">
+                    <DeleteSupplier id={s.id} name={s.name} />
+                  </td>
+                )}
               </tr>
             ))}
-            {suppliers.length === 0 && <tr><td colSpan={3} className="px-4 py-10 text-center text-gray-400">No suppliers yet.</td></tr>}
+            {suppliers.length === 0 && <tr><td colSpan={canManage ? 4 : 3} className="px-4 py-10 text-center text-gray-400">No suppliers yet.</td></tr>}
           </tbody>
         </table>
       </div>

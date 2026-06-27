@@ -5,6 +5,7 @@ import { getCurrentUser, can } from "@/lib/auth";
 import { NoAccess } from "@/components/NoAccess";
 import { formatPKR, formatDateTime } from "@/lib/format";
 import { AddCustomer } from "./AddCustomer";
+import { DeleteCustomer } from "./DeleteCustomer";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,7 @@ export default async function CustomersPage({
 }) {
   const user = await getCurrentUser();
   if (!can(user?.role, "customers")) return <NoAccess role={user?.role ?? "unknown"} />;
+  const canManage = user?.role === "owner" || user?.role === "manager";
 
   const { q } = await searchParams;
   const customers = listCustomers(q);
@@ -53,6 +55,7 @@ export default async function CustomersPage({
               <th className="px-4 py-3 text-center">Purchases</th>
               <th className="px-4 py-3 text-right">Balance (Udhaar)</th>
               <th className="px-4 py-3">Since</th>
+              {canManage && <th className="px-4 py-3 text-center">Actions</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -76,11 +79,16 @@ export default async function CustomersPage({
                   )}
                 </td>
                 <td className="px-4 py-3 text-gray-400 text-xs">{formatDateTime(c.createdAt)}</td>
+                {canManage && (
+                  <td className="px-4 py-3 text-center">
+                    <DeleteCustomer id={c.id} name={c.name} />
+                  </td>
+                )}
               </tr>
             ))}
             {customers.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-gray-400">
+                <td colSpan={canManage ? 7 : 6} className="px-4 py-10 text-center text-gray-400">
                   No customers found.
                 </td>
               </tr>
